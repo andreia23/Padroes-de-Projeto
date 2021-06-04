@@ -1,23 +1,12 @@
-import AbstractClass
-from ConcreteClass1 import ConcreteClass1
-from ConcreteClass2 import ConcreteClass2
+from HamburgeConcrete import HamburgerMeal
+from TacoConcrete import TacoMeal
 
-def client_code(abstract_class: AbstractClass) -> None:
-    """
-    The client code calls the template method to execute the algorithm. Client
-    code does not have to know the concrete class of an object it works with, as
-    long as it works with objects through the interface of their base class.
-    """
+if __name__ == '__main__':
+    meal1 = HamburgerMeal()
+    meal1.do_meal()
+    print("-----")
 
-    # ...
-    abstract_class.template_method()
-    # ...
+    meal2 = TacoMeal()
+    meal2.do_meal()
+    print("-----")
 
-
-if __name__ == "__main__":
-    print("Same client code can work with different subclasses:")
-    client_code(ConcreteClass1())
-    print("")
-
-    print("Same client code can work with different subclasses:")
-    client_code(ConcreteClass2())
