@@ -1,75 +1,79 @@
-from __future__ import annotations
-from abc import ABC, abstractmethod
-from typing import List
+import abc
 
-
-class Component(ABC):
-  
-    @abstractmethod
-    def accept(self, visitor: Visitor) -> None:
+class ItemElement(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def accept(self):
         pass
 
-
-class ConcreteComponentA(Component):
-   
-    def accept(self, visitor: Visitor) -> None:
-        
-        visitor.visit_concrete_component_a(self)
-
-    def exclusive_method_of_concrete_component_a(self) -> str:
-        return "A"
-
-
-class ConcreteComponentB(Component):
-   
-    def accept(self, visitor: Visitor):
-        visitor.visit_concrete_component_b(self)
-
-    def special_method_of_concrete_component_b(self) -> str:
-        return "B"
-
-
-class Visitor(ABC):
-
-    @abstractmethod
-    def visit_concrete_component_a(self, element: ConcreteComponentA) -> None:
+class ShoppingCartVisitor(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def visit(self, item):
         pass
 
-    @abstractmethod
-    def visit_concrete_component_b(self, element: ConcreteComponentB) -> None:
-        pass
+class Book(ItemElement):
+    def __init__(self, cost, isbn):
+        self.price = cost
+        self.isbn = isbn
+
+    def get_price(self):
+        return self.price
+
+    def get_isbn(self):
+        return self.isbn
+
+    def accept(self, visitor):
+        return visitor.visit(self)
 
 
-class ConcreteVisitor1(Visitor):
-    def visit_concrete_component_a(self, element) -> None:
-        print(f"{element.exclusive_method_of_concrete_component_a()} + ConcreteVisitor1")
+class Fruit(ItemElement):
+    def __init__(self, price, wt, nm):
+        self.price = price
+        self.weight = wt
+        self.name = nm
 
-    def visit_concrete_component_b(self, element) -> None:
-        print(f"{element.special_method_of_concrete_component_b()} + ConcreteVisitor1")
+    def get_price(self):
+        return self.price
 
+    def get_weight(self):
+        return self.weight
 
-class ConcreteVisitor2(Visitor):
-    def visit_concrete_component_a(self, element) -> None:
-        print(f"{element.exclusive_method_of_concrete_component_a()} + ConcreteVisitor2")
+    def get_name(self):
+        return self.name
 
-    def visit_concrete_component_b(self, element) -> None:
-        print(f"{element.special_method_of_concrete_component_b()} + ConcreteVisitor2")
+    def accept(self, visitor):
+        return visitor.visit(self)
 
+class ShoppingCartVisitorImpl(ShoppingCartVisitor):
+    def visit(self, item):
+        if isinstance(item, Book):
+            cost = 0
+            #apply 5$ discount if book price is greater than 50
+            if item.get_price() > 50:
+                cost = item.get_price() - 5
+            else:
+                cost = item.get_price()
+            print("Book ISBN:: {} cost = {}".format(item.get_isbn(), cost))
+            return cost
+        elif isinstance(item, Fruit):
+            cost = item.get_price() * item.get_weight()
+            print("{} cost = {}".format(item.get_name(), cost))
+            return cost
 
-def client_code(components: List[Component], visitor: Visitor) -> None:
-    
-    
-    for component in components:
-        component.accept(visitor)
-    
+def calculate_price(items):
+    visitor = ShoppingCartVisitorImpl()
+    sum = 0
+    for item in items:
+        sum = sum + item.accept(visitor)
 
-if __name__ == "__main__":
-    components = [ConcreteComponentA(), ConcreteComponentB()]
+    return sum
 
-    print("The client code works with all visitors via the base Visitor interface:")
-    visitor1 = ConcreteVisitor1()
-    client_code(components, visitor1)
+if __name__ == '__main__':
+    items = [
+        Book(20, "1234"),
+        Book(100, "5678"),
+        Fruit(10, 2, "Banana"),
+        Fruit(5, 5, "Apple")
+    ]
 
-    print("It allows the same client code to work with different types of visitors:")
-    visitor2 = ConcreteVisitor2()
-    client_code(components, visitor2)
+    total = calculate_price(items)
+    print("Total Cost = {}".format(total))
